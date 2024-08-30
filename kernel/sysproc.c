@@ -91,3 +91,10 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// Modificación
+uint64
+sys_getppid(void)
+{
+  return myproc()->parent->pid;
+}
