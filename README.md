@@ -133,7 +133,7 @@ mprotect(void *addr, int len){
   return 0;
 }
 ```
-- En la función ```mprotect()```, primero se revisa que la dirección ingresada como su largo sean del formato correcto. Luego se crea un puntero que apunte al proceso actual. Después se crea un ciclo para recorrer todas las páginas asociadas a la logitud dada. Dentro de este ciclo, se recoge el Page Entry asociada a la dirección de memoria entregada, para comprobar que no este vacío o sea inválida. Una vez comprobado lo anterior, se hace la operación lógica AND usando el bit de escritura definido en el opuesto booleano de PTE_W.
+- En la función ```mprotect()```, primero se revisa que la dirección ingresada como su largo sean del formato correcto. Luego se crea un puntero que apunte al proceso actual. Después se crea un ciclo para recorrer todas las páginas asociadas a la logitud dada. Dentro de este ciclo, se recoge el Page Entry asociada a la dirección de memoria entregada, para comprobar que no este vacío o sea inválida. Una vez comprobado lo anterior, se obtiene el Page Entry dada una dirección y pagetable usando walk, para obtener el puntero de la dirección física de la dirección virtual,luego se comprueba que existe y es válido, para terminar con la operación lógica AND usando el bit de escritura definido en el opuesto booleano de PTE_W.
 - En la función ```munprotect()```, es exactamente igual a ```mprotect()```, exceptuando que en vez de la línea 
 ```c
 *pte &= ~PTE_W;
