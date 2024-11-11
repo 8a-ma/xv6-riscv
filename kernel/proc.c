@@ -693,3 +693,72 @@ procdump(void)
     printf("\n");
   }
 }
+
+int
+mprotect(void *addr, int len){
+  // id docker 80e34dc65c0a
+  // sudo docker run --rm -v "$(pwd)":/project -w /project -it 80e34dc65c0a make
+  // sudo docker run --rm -v "$(pwd)":/project -w /project -it 80e34dc65c0a make fs.img
+  // https://www.geeksforgeeks.org/void-pointer-c-cpp/
+  // https://github.com/christopherdiehl/xv6-mprotect/blob/master/sysproc.c#L111
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=781552
+
+  struct proc *p = myproc();
+
+  if ((uint64)addr % PGSIZE != 0 || len <= 0) {
+    return -1; // Invalid parameters
+  }
+  for (int i = 0; i < len; i++) {
+      
+    pte_t *pte = walk(p->pagetable, (uint64)addr + i * PGSIZE, 0);
+
+    if (*pte == 0 || (*pte & ~PTE_V) == 0) {
+      return -1; // Page not have something
+    }
+
+    printf("Valor addr int: %ld\n", *pte);
+    printf("Valor addr hex: %lx\n", *pte & 0xFFFFFFUL);
+
+    printf("Valor addr hex & PTE_W hex: %lx\n", (*pte & 0xFFFFFFUL) & (~PTE_W & 0xFFFFFFUL));
+    printf("Valor addr & PTE_W: %ld\n", *pte & ~PTE_W);
+
+    // *pte = *pte & ~PTE_W;
+    // pte_t d = *pte;
+    // printf("%ld\n", (d & PTE_W)&0xFFFFFFUL);
+
+
+    *pte &= ~PTE_W; // Clear writable bit
+    
+  }
+
+  return 0;
+}
+
+int
+munprotect(void *addr, int len){
+  // id docker 80e34dc65c0a
+  // sudo docker run --rm -v "$(pwd)":/project -w /project -it 80e34dc65c0a make
+  // sudo docker run --rm -v "$(pwd)":/project -w /project -it 80e34dc65c0a make fs.img
+  // https://www.geeksforgeeks.org/void-pointer-c-cpp/
+  // https://github.com/christopherdiehl/xv6-mprotect/blob/master/sysproc.c#L111
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=781552
+
+  struct proc *p = myproc();
+
+  if ((uint64)addr % PGSIZE != 0 || len <= 0) {
+    return -1; // Invalid parameters
+  }
+  for (int i = 0; i < len; i++) {
+      
+    pte_t *pte = walk(p->pagetable, (uint64)addr + i * PGSIZE, 0);
+
+    if (*pte == 0 || (*pte & ~PTE_V) == 0) {
+      return -1; // Page not have something
+    }
+
+    *pte |= PTE_W; // Set writable bit
+    
+  }
+
+  return 0;
+}
