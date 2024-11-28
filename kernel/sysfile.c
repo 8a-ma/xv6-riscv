@@ -271,6 +271,8 @@ create(char *path, short type, short major, short minor)
   ip->major = major;
   ip->minor = minor;
   ip->nlink = 1;
+  ip->mode = M_ALL;
+  
   iupdate(ip);
 
   if(type == T_DIR){  // Create . and .. entries.
@@ -301,6 +303,38 @@ create(char *path, short type, short major, short minor)
   return 0;
 }
 
+int
+validRead(char *path){
+  char s[20];
+  struct inode *iParent = nameiparent(path, s);
+
+  ilock(iParent);
+  int modeParent = iParent->mode;
+  iunlock(iParent);
+
+  if(modeParent & M_READ)
+    return 1;
+
+  return -1;
+}
+
+int
+validWrite(char *path){
+  char s[20];
+  struct inode *iParent = nameiparent(path, s);
+
+  ilock(iParent);
+  int modeParent = iParent->mode;
+  iunlock(iParent);
+
+  if(modeParent & M_WRITE){
+    return 1;
+  }
+
+  return -1;
+
+}
+
 uint64
 sys_open(void)
 {
@@ -313,6 +347,20 @@ sys_open(void)
   argint(1, &omode);
   if((n = argstr(0, path, MAXPATH)) < 0)
     return -1;
+
+
+  // Reglas de open read only
+  if(omode&O_RDONLY || omode&O_RDWR){
+    if(validRead(path) <0 )
+      return -1;
+  }
+
+  // Reglas open write only
+  if(omode&O_WRONLY || omode&O_RDWR || omode&O_CREATE){
+    if(validWrite(path) <0)
+      return -1;
+  
+  }
 
   begin_op();
 
@@ -502,4 +550,22 @@ sys_pipe(void)
     return -1;
   }
   return 0;
+}
+
+uint64
+sys_chmod(void)
+{
+  char path[MAXPATH];
+  int mode;
+  
+  if(argstr(0, path, MAXPATH) < 0) return -1;
+  argint(1, &mode);
+
+  struct inode *ip = namei(path);
+
+  ilock(ip);
+  ip->mode=mode;
+  iunlock(ip);
+
+  return 1;
 }

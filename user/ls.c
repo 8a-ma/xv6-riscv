@@ -65,7 +65,7 @@ ls(char *path)
         printf("ls: cannot stat %s\n", buf);
         continue;
       }
-      printf("%s %d %d %d\n", fmtname(buf), st.type, st.ino, (int) st.size);
+      printf("%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, (int) st.size, st.mode);
     }
     break;
   }
