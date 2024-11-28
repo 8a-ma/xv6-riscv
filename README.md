@@ -291,3 +291,4 @@ int chmod(const char*, int);
 # Referencias bibliográficas
 - [xv6 labs @KUL](https://os.edu.distrinet-research.be/labs/file-systems/3_access_perm/) 
 - [xv6 chmod and usergroup](https://github.com/gojkovicmatija99/Users-and-groups-in-xv6/blob/master/)
+- 
